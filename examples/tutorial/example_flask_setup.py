@@ -23,10 +23,8 @@ class MainTask(BasicTask):
             counter += 1
             task_logger.debug("doing some simple task, progress {}%.".format(counter * 5))
             time.sleep(0.5)
-            safe_pipe_send(self._lock, self._pipe_end, counter)
-            if self._stop_event.is_set():
-                self._abort_log(task_logger)
-                return
+            self.upload_status(counter)
+            self.checkpoint()
 
 
 main_api = Api()

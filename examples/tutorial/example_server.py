@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # @author: Yuhao Wang
-# @email: wangyuhao@shanshu.ai
 # @date: 2022/07/20
 
 from example_flask_setup import main_api

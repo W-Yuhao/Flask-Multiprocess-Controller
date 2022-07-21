@@ -18,11 +18,13 @@ class BasicTask(metaclass=abc.ABCMeta):
 
     execute method need to be overridden as needed
     """
+
+    # the counter is exposed as static for the controller to retrieve the counter info
     counter: int = 0
     task_name: str
     logger: logging.Logger
 
-    def __init__(self, stop_event: Event, pipe_end: Connection, lock: Lock, queue: Queue,
+    def __init__(self, stop_event: Event, pipe_end: Connection, lock: Lock, queue: Queue, counter: int,
                  log_configurator: type(BasicLoggerConfigurator)):
 
         self._stop_event: Event = stop_event
@@ -30,6 +32,7 @@ class BasicTask(metaclass=abc.ABCMeta):
         self._lock: Lock = lock
         self._log_queue: Queue = queue
         self._log_configurator: type(BasicLoggerConfigurator) = log_configurator
+        self.counter: int = counter
 
         # set up the worker logger when init
         self._log_configurator.worker_log_setup(self._log_queue)

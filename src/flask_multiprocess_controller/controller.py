@@ -340,11 +340,14 @@ class BasicController(metaclass=abc.ABCMeta):
         parent_connection, child_connection = multiprocessing.Pipe(duplex=False)
         new_lock = multiprocessing.Lock()
 
+        # maintaining the counter in the controller instead of the task for it will get instantiated every time
+        target_task.counter += 1
         # set running process to daemon in case that the running process may be orphaned
         # after the main process exit exceptionally
-        task_obj = target_task(*(new_event, child_connection, new_lock, self._log_queue, self._log_configurator) + args)
+        task_obj = target_task(*(new_event, child_connection, new_lock, self._log_queue, target_task.counter,
+                                 self._log_configurator) + args)
         new_process = multiprocessing.Process(target=task_obj.execute,
-                                              name=str(task_obj.task_name) + '-' + str(task_obj.counter),
+                                              name=str(task_obj.task_name) + '-' + str(target_task.counter),
                                               args=args, kwargs=kwargs, daemon=True)
         # create another process and run
         new_process.start()

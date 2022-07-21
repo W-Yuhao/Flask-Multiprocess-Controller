@@ -10,7 +10,7 @@ from logging.handlers import TimedRotatingFileHandler
 from multiprocessing import Queue
 
 
-class BasicLoggerConfigurator(metaclass=abc.ABCMeta):
+class MetaMPLoggerConfigurator(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
@@ -45,7 +45,7 @@ class BasicLoggerConfigurator(metaclass=abc.ABCMeta):
         logger.setLevel(logging.DEBUG)
 
 
-class DefaultLoggerConfigurator(BasicLoggerConfigurator):
+class DefaultMPLoggerConfigurator(MetaMPLoggerConfigurator):
     """
     Default multiprocessing logger, only contains a single stream handler
     """

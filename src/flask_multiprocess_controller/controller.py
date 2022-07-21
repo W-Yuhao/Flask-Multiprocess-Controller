@@ -15,13 +15,13 @@ from queue import PriorityQueue
 from typing import Dict, Tuple
 from werkzeug.exceptions import MethodNotAllowed
 
-from .logger import BasicLoggerConfigurator, DefaultLoggerConfigurator
+from .logger import MetaMPLoggerConfigurator, DefaultMPLoggerConfigurator
 from .utils import send_request
 
-from .task import BasicTask
+from .task import MetaMPTask
 
 
-class BasicController(metaclass=abc.ABCMeta):
+class MetaMPController(metaclass=abc.ABCMeta):
     """
     abstract meta class for api controller class, designed to support multiprocessing spawning from http request
     along with some controlling and communicating mechanisms
@@ -34,9 +34,9 @@ class BasicController(metaclass=abc.ABCMeta):
     _logger_init_counter: bool = False
     _name: str = 'Basic'
 
-    def __init__(self, target_task: type(BasicTask), callback_url: str = None,
+    def __init__(self, target_task: type(MetaMPTask), callback_url: str = None,
                  max_num_process: int = 1, max_num_queue: int = -1,
-                 logger_configurator_cls: type(BasicLoggerConfigurator) = DefaultLoggerConfigurator):
+                 logger_configurator_cls: type(MetaMPLoggerConfigurator) = DefaultMPLoggerConfigurator):
         assert max_num_process > 0, "max_num_process should be greater than 0, passing {}".format(max_num_process)
         self._max_num_process = max_num_process
         # because of GIL, the following dicts are thread-safe
@@ -269,9 +269,9 @@ class BasicController(metaclass=abc.ABCMeta):
         the method is to listen the log_queue and handle the log by the listening(MainProcess) logger
         :return:
         """
-        if not BasicController._logger_init_counter:
+        if not MetaMPController._logger_init_counter:
             self._log_configurator.listener_log_setup()
-            BasicController._logger_init_counter = True
+            MetaMPController._logger_init_counter = True
         while True:
             try:
                 record = self._log_queue.get()
@@ -316,7 +316,7 @@ class BasicController(metaclass=abc.ABCMeta):
                                 "uuid": task_uuid}
                 send_request(self._callback_url, callback_msg)
 
-    def _running(self, task_uuid: str, target_task: type(BasicTask), *args, **kwargs) -> None:
+    def _running(self, task_uuid: str, target_task: type(MetaMPTask), *args, **kwargs) -> None:
         """
         this method is called by the controlling thread to create, run and control the calculating process to execute
         target_function
@@ -328,7 +328,7 @@ class BasicController(metaclass=abc.ABCMeta):
         assert isinstance(target_task, type), \
             "Invalid input, target_task must be a class, instead of {}".format(type(target_task))
 
-        assert issubclass(target_task, BasicTask), \
+        assert issubclass(target_task, MetaMPTask), \
             "Invalid class {}, target_task must inherit from BasicTask".format(target_task)
 
         # creating the primitive the process will need to use

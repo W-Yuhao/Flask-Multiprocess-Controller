@@ -1,11 +1,22 @@
 # -*- coding: utf-8 -*-
 # @author: Yuhao Wang
-# @email: wangyuhao@shanshu.ai
 # @date: 2022/07/20
 
-from .task import BasicTask
-from .controller import BasicController
-from .resource import BasicResource
+from .task import MetaMPTask
+from .controller import MetaMPController
+from .resource import MetaMPResource
 from .utils import safe_pipe_send
-from .template import TemplateResource, TemplateController
-from .logger import BasicLoggerConfigurator
+from .template import TemplateMPResource, TemplateMPController
+from .logger import MetaMPLoggerConfigurator
+
+__version__ = '0.0'
+
+__all__ = [
+    'MetaMPTask',
+    'MetaMPController',
+    'MetaMPResource',
+    'safe_pipe_send',
+    'TemplateMPResource',
+    'TemplateMPController',
+    'MetaMPLoggerConfigurator'
+]

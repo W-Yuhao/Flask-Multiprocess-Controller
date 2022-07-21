@@ -9,7 +9,7 @@ from flask_restful import Api
 from src.flask_multiprocess_controller import *
 
 
-class MainTask(BasicTask):
+class MainTask(MetaMPTask):
 
     def execute(self, *args, **kwargs) -> None:
         task_logger = logging.getLogger(str(os.getpid()))
@@ -26,12 +26,14 @@ class MainTask(BasicTask):
             self.upload_status(counter)
             self.checkpoint()
 
+        task_logger.info("Execution Finished!")
+
 
 main_api = Api()
 # this is the place to config the max num of processes you'd like to use in this specific controller
-main_controller = TemplateController(target_task=MainTask, max_num_process=2)
+main_controller = TemplateMPController(target_task=MainTask, max_num_process=2)
 
 # must pass the controller object to the resource object
 # when received a http request, a new resource instance will be created, so it's not possible to store info in
 # resource object
-main_api.add_resource(TemplateResource, '/main', resource_class_args=(main_controller,))
+main_api.add_resource(TemplateMPResource, '/main', resource_class_args=(main_controller,))

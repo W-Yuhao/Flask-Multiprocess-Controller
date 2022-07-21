@@ -7,11 +7,11 @@ import abc
 from functools import wraps
 from multiprocessing import Event, Lock, Queue
 from multiprocessing.connection import Connection
-from .logger import BasicLoggerConfigurator
+from .logger import MetaMPLoggerConfigurator
 from .utils import AbortException
 
 
-class BasicTask(metaclass=abc.ABCMeta):
+class MetaMPTask(metaclass=abc.ABCMeta):
     """
     abstract meta class for task class, BasicTask instance is created inside BasicController to execute the task's
     main scripts
@@ -25,13 +25,13 @@ class BasicTask(metaclass=abc.ABCMeta):
     logger: logging.Logger
 
     def __init__(self, stop_event: Event, pipe_end: Connection, lock: Lock, queue: Queue, counter: int,
-                 log_configurator: type(BasicLoggerConfigurator)):
+                 log_configurator: type(MetaMPLoggerConfigurator)):
 
         self._stop_event: Event = stop_event
         self._pipe_end: Connection = pipe_end
         self._lock: Lock = lock
         self._log_queue: Queue = queue
-        self._log_configurator: type(BasicLoggerConfigurator) = log_configurator
+        self._log_configurator: type(MetaMPLoggerConfigurator) = log_configurator
         self.counter: int = counter
 
         # set up the worker logger when init

@@ -2,13 +2,13 @@
 # @author: Yuhao Wang
 # @date: 2022/07/21
 
-from .resource import BasicResource
-from .controller import BasicController
+from .resource import MetaMPResource
+from .controller import MetaMPController
 
 
-class TemplateController(BasicController):
+class TemplateMPController(MetaMPController):
     pass
 
 
-class TemplateResource(BasicResource):
+class TemplateMPResource(MetaMPResource):
     pass

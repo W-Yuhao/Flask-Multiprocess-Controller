@@ -6,7 +6,7 @@ import os
 import logging
 import time
 from flask_restful import Api
-from src.MultiProcessingFlaskFramework import *
+from src.flask_multiprocess_controller import *
 
 
 class MainTask(BasicTask):

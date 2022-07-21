@@ -16,7 +16,7 @@ from typing import Dict, Tuple
 from werkzeug.exceptions import MethodNotAllowed
 
 from .logger import BasicLoggerConfigurator, DefaultLoggerConfigurator
-from .utils import alg_callback
+from .utils import send_request
 
 from .task import BasicTask
 
@@ -34,7 +34,7 @@ class BasicController(metaclass=abc.ABCMeta):
     _logger_init_counter: bool = False
     _name: str = 'Basic'
 
-    def __init__(self, target_task: type(BasicTask), callback_url: str,
+    def __init__(self, target_task: type(BasicTask), callback_url: str = None,
                  max_num_process: int = 1, max_num_queue: int = -1,
                  logger_configurator_cls: type(BasicLoggerConfigurator) = DefaultLoggerConfigurator):
         assert max_num_process > 0, "max_num_process should be greater than 0, passing {}".format(max_num_process)
@@ -55,7 +55,8 @@ class BasicController(metaclass=abc.ABCMeta):
         # future cancel request or query request will need the ident of the controlling thread to link to the process
         self._control_relationship: Dict[int, int] = dict()
 
-        self._callback_url = callback_url
+        # if the callback url has not be assigned, the callback is disabled
+        self._callback_url: str = callback_url
 
         # this counter to log the times this controller is getting a post request (executing task request)
         self._call_counter = 0
@@ -77,12 +78,22 @@ class BasicController(metaclass=abc.ABCMeta):
         self._waiting_queue_listener_thread.start()
 
     # noinspection PyMethodOverriding
-    def __init_subclass__(cls, controller_name: str, logger: logging.Logger, decorator=None) -> None:
-        cls._name = controller_name
+    def __init_subclass__(cls, controller_name: str = None, logger: logging.Logger = None, decorator=None) -> None:
+
+        # default name set to class name if not specified
+        if controller_name is None:
+            cls._name = cls.__name__
+
+        # default logger set to class name on root hierarchy if not specified
+        if logger is None:
+            cls._logger = logging.getLogger(cls.__name__)
+
+        # default decorator set to simple print info if not specified
         if decorator is None:
             __decorator = cls._print_request_info(cls._logger, cls._name)
         else:
             __decorator = decorator
+
         cls.get = __decorator(cls.get)
         cls.post = __decorator(cls.post)
         cls.head = __decorator(cls.head)
@@ -300,10 +311,10 @@ class BasicController(metaclass=abc.ABCMeta):
             task_uuid = self._waiting_queue.get(block=True)[1]
             self._create_control_thread(task_uuid)
 
-            callback_msg = {"msg": "Task with internal uuid {} begin to process".format(task_uuid),
-                            "uuid": task_uuid}
-
-            alg_callback(self._callback_url, callback_msg)
+            if self._callback_url is not None:
+                callback_msg = {"msg": "Task with internal uuid {} begin to process".format(task_uuid),
+                                "uuid": task_uuid}
+                send_request(self._callback_url, callback_msg)
 
     def _running(self, task_uuid: str, target_task: type(BasicTask), *args, **kwargs) -> None:
         """
@@ -361,7 +372,7 @@ class BasicController(metaclass=abc.ABCMeta):
         # after a task is complete, there always a room for a new task to be executed
         self._waiting_queue_intake_event.set()
 
-        callback_msg = {"msg": "Task with internal uuid {} ended".format(task_uuid),
-                        "uuid": task_uuid}
-
-        alg_callback(self._callback_url, callback_msg)
+        if self._callback_url is not None:
+            callback_msg = {"msg": "Task with internal uuid {} ended".format(task_uuid),
+                            "uuid": task_uuid}
+            send_request(self._callback_url, callback_msg)

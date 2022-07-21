@@ -26,7 +26,7 @@ def safe_pipe_send(lock: Lock, pipe_end: Connection, msg) -> None:
         lock.release()
 
 
-def alg_callback(url, data, callback_loop: int = 3,
+def send_request(url, data, callback_loop: int = 3,
                  callback_header=None, callback_timeout: int = 60):
 
     if callback_header is None:

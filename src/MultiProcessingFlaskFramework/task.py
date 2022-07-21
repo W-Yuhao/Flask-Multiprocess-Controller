@@ -32,6 +32,13 @@ class BasicTask(metaclass=abc.ABCMeta):
         # set up the worker logger when init
         self._log_configurator.worker_log_setup(self._log_queue)
 
+    def __init_subclass__(cls, task_name: str = None, **kwargs):
+
+        # set for default task_name
+        cls.task_name = task_name
+        if cls.task_name is None:
+            cls.task_name = cls.__name__
+
     @abc.abstractmethod
     def execute(self, *args, **kwargs) -> None:
         """

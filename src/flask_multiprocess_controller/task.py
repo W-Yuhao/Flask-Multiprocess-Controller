@@ -4,9 +4,11 @@
 
 import logging
 import abc
+from functools import wraps
 from multiprocessing import Event, Lock, Queue
 from multiprocessing.connection import Connection
 from .logger import BasicLoggerConfigurator
+from .utils import AbortException
 
 
 class BasicTask(metaclass=abc.ABCMeta):
@@ -16,28 +18,33 @@ class BasicTask(metaclass=abc.ABCMeta):
 
     execute method need to be overridden as needed
     """
-
+    counter: int = 0
     task_name: str
+    logger: logging.Logger
 
     def __init__(self, stop_event: Event, pipe_end: Connection, lock: Lock, queue: Queue,
-                 log_configurator: type(BasicLoggerConfigurator), counter: int = 0):
+                 log_configurator: type(BasicLoggerConfigurator)):
 
         self._stop_event: Event = stop_event
         self._pipe_end: Connection = pipe_end
         self._lock: Lock = lock
         self._log_queue: Queue = queue
         self._log_configurator: type(BasicLoggerConfigurator) = log_configurator
-        self.counter = counter
 
         # set up the worker logger when init
         self._log_configurator.worker_log_setup(self._log_queue)
 
-    def __init_subclass__(cls, task_name: str = None, **kwargs):
-
+    def __init_subclass__(cls, task_name: str = None, logger: logging.Logger = None, **kwargs):
         # set for default task_name
-        cls.task_name = task_name
-        if cls.task_name is None:
+        if task_name is None:
             cls.task_name = cls.__name__
+
+        # default logger set to class name on root hierarchy if not specified
+        if logger is None:
+            cls.logger = logging.getLogger(cls.__name__)
+
+        # catch AbortException when when receiving STOP signal, necessary for gently stop
+        cls.execute = cls._exception_catcher(cls.execute)
 
     @abc.abstractmethod
     def execute(self, *args, **kwargs) -> None:
@@ -57,3 +64,31 @@ class BasicTask(metaclass=abc.ABCMeta):
         :return:
         """
         logger.critical("Task {}-{} aborted by signal.".format(self.task_name, self.counter))
+
+    def upload_status(self, msg):
+        """
+        safely send msg using Pipe between processes by Lock
+        :param msg: message to send
+        :return:
+        """
+        self._lock.acquire()
+        try:
+            self._pipe_end.send(msg)
+        finally:
+            self._lock.release()
+
+    def checkpoint(self):
+        if self._stop_event.is_set():
+            raise AbortException("Task {}-{} aborted by signal.".format(self.task_name, self.counter))
+
+    @classmethod
+    def _exception_catcher(cls, execute):
+        @wraps(execute)
+        def with_exception_catcher_execute(*args, **kwargs):
+            try:
+                execute(*args, **kwargs)
+            except AbortException as ae:
+                cls.logger.info(ae)
+            except Exception as e:
+                cls.logger.critical(e)
+        return with_exception_catcher_execute

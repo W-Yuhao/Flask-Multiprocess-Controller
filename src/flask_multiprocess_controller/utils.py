@@ -11,6 +11,13 @@ from multiprocessing.connection import Connection
 logger = logging.getLogger(__name__)
 
 
+class AbortException(BaseException):
+    """
+    Exception raise when receive stop signal when at checkpoint method in BasicTask()
+    """
+    pass
+
+
 def safe_pipe_send(lock: Lock, pipe_end: Connection, msg) -> None:
     """
     safely send msg using Pipe between processes by Lock

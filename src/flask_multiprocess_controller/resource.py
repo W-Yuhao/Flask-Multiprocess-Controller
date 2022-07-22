@@ -8,17 +8,17 @@ import json
 from flask import request
 from flask_restful import Resource
 
-from .controller import BasicController
+from .controller import MetaMPController
 
 
-class BasicResource(Resource):
+class MetaMPResource(Resource):
     """
     overridden resource class to take BasicController as its controller, and execute controller's method when get
     http request from WSGI server
     """
 
-    def __init__(self, controller: BasicController):
-        super(BasicResource, self).__init__()
+    def __init__(self, controller: MetaMPController):
+        super(MetaMPResource, self).__init__()
         self._controller = controller
 
     # all supported http methods are predefined to linked to the _controller object

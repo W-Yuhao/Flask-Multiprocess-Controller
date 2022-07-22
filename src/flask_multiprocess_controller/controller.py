@@ -15,13 +15,13 @@ from queue import PriorityQueue
 from typing import Dict, Tuple
 from werkzeug.exceptions import MethodNotAllowed
 
-from .logger import BasicLoggerConfigurator, DefaultLoggerConfigurator
-from .utils import alg_callback
+from .logger import MetaMPLoggerConfigurator, DefaultMPLoggerConfigurator
+from .utils import send_request
 
-from .task import BasicTask
+from .task import MetaMPTask
 
 
-class BasicController(metaclass=abc.ABCMeta):
+class MetaMPController(metaclass=abc.ABCMeta):
     """
     abstract meta class for api controller class, designed to support multiprocessing spawning from http request
     along with some controlling and communicating mechanisms
@@ -34,9 +34,9 @@ class BasicController(metaclass=abc.ABCMeta):
     _logger_init_counter: bool = False
     _name: str = 'Basic'
 
-    def __init__(self, target_task: type(BasicTask), callback_url: str,
+    def __init__(self, target_task: type(MetaMPTask), callback_url: str = None,
                  max_num_process: int = 1, max_num_queue: int = -1,
-                 logger_configurator_cls: type(BasicLoggerConfigurator) = DefaultLoggerConfigurator):
+                 logger_configurator_cls: type(MetaMPLoggerConfigurator) = DefaultMPLoggerConfigurator):
         assert max_num_process > 0, "max_num_process should be greater than 0, passing {}".format(max_num_process)
         self._max_num_process = max_num_process
         # because of GIL, the following dicts are thread-safe
@@ -55,7 +55,8 @@ class BasicController(metaclass=abc.ABCMeta):
         # future cancel request or query request will need the ident of the controlling thread to link to the process
         self._control_relationship: Dict[int, int] = dict()
 
-        self._callback_url = callback_url
+        # if the callback url has not be assigned, the callback is disabled
+        self._callback_url: str = callback_url
 
         # this counter to log the times this controller is getting a post request (executing task request)
         self._call_counter = 0
@@ -77,12 +78,22 @@ class BasicController(metaclass=abc.ABCMeta):
         self._waiting_queue_listener_thread.start()
 
     # noinspection PyMethodOverriding
-    def __init_subclass__(cls, controller_name: str, logger: logging.Logger, decorator=None) -> None:
-        cls._name = controller_name
+    def __init_subclass__(cls, controller_name: str = None, logger: logging.Logger = None, decorator=None) -> None:
+
+        # default name set to class name if not specified
+        if controller_name is None:
+            cls._name = cls.__name__
+
+        # default logger set to class name on root hierarchy if not specified
+        if logger is None:
+            cls._logger = logging.getLogger(cls.__name__)
+
+        # default decorator set to simple print info if not specified
         if decorator is None:
             __decorator = cls._print_request_info(cls._logger, cls._name)
         else:
             __decorator = decorator
+
         cls.get = __decorator(cls.get)
         cls.post = __decorator(cls.post)
         cls.head = __decorator(cls.head)
@@ -258,9 +269,9 @@ class BasicController(metaclass=abc.ABCMeta):
         the method is to listen the log_queue and handle the log by the listening(MainProcess) logger
         :return:
         """
-        if not BasicController._logger_init_counter:
+        if not MetaMPController._logger_init_counter:
             self._log_configurator.listener_log_setup()
-            BasicController._logger_init_counter = True
+            MetaMPController._logger_init_counter = True
         while True:
             try:
                 record = self._log_queue.get()
@@ -300,12 +311,12 @@ class BasicController(metaclass=abc.ABCMeta):
             task_uuid = self._waiting_queue.get(block=True)[1]
             self._create_control_thread(task_uuid)
 
-            callback_msg = {"msg": "Task with internal uuid {} begin to process".format(task_uuid),
-                            "uuid": task_uuid}
+            if self._callback_url is not None:
+                callback_msg = {"msg": "Task with internal uuid {} begin to process".format(task_uuid),
+                                "uuid": task_uuid}
+                send_request(self._callback_url, callback_msg)
 
-            alg_callback(self._callback_url, callback_msg)
-
-    def _running(self, task_uuid: str, target_task: type(BasicTask), *args, **kwargs) -> None:
+    def _running(self, task_uuid: str, target_task: type(MetaMPTask), *args, **kwargs) -> None:
         """
         this method is called by the controlling thread to create, run and control the calculating process to execute
         target_function
@@ -317,7 +328,7 @@ class BasicController(metaclass=abc.ABCMeta):
         assert isinstance(target_task, type), \
             "Invalid input, target_task must be a class, instead of {}".format(type(target_task))
 
-        assert issubclass(target_task, BasicTask), \
+        assert issubclass(target_task, MetaMPTask), \
             "Invalid class {}, target_task must inherit from BasicTask".format(target_task)
 
         # creating the primitive the process will need to use
@@ -329,11 +340,14 @@ class BasicController(metaclass=abc.ABCMeta):
         parent_connection, child_connection = multiprocessing.Pipe(duplex=False)
         new_lock = multiprocessing.Lock()
 
+        # maintaining the counter in the controller instead of the task for it will get instantiated every time
+        target_task.counter += 1
         # set running process to daemon in case that the running process may be orphaned
         # after the main process exit exceptionally
-        task_obj = target_task(*(new_event, child_connection, new_lock, self._log_queue, self._log_configurator) + args)
+        task_obj = target_task(*(new_event, child_connection, new_lock, self._log_queue, target_task.counter,
+                                 self._log_configurator) + args)
         new_process = multiprocessing.Process(target=task_obj.execute,
-                                              name=str(task_obj.task_name) + '-' + str(task_obj.counter),
+                                              name=str(task_obj.task_name) + '-' + str(target_task.counter),
                                               args=args, kwargs=kwargs, daemon=True)
         # create another process and run
         new_process.start()
@@ -361,7 +375,7 @@ class BasicController(metaclass=abc.ABCMeta):
         # after a task is complete, there always a room for a new task to be executed
         self._waiting_queue_intake_event.set()
 
-        callback_msg = {"msg": "Task with internal uuid {} ended".format(task_uuid),
-                        "uuid": task_uuid}
-
-        alg_callback(self._callback_url, callback_msg)
+        if self._callback_url is not None:
+            callback_msg = {"msg": "Task with internal uuid {} ended".format(task_uuid),
+                            "uuid": task_uuid}
+            send_request(self._callback_url, callback_msg)

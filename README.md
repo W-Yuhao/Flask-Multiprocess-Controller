@@ -99,3 +99,7 @@ app.run()
 ## License
 
 See the [LICENSE](LICENSE.md) file for license rights and limitations (BSD-3-Clause).
+
+## Links
+
+- PyPI Releases: https://pypi.org/project/Flask-Multiprocess-Controller/

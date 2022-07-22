@@ -112,10 +112,10 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'Flask>=1.1.2',
-        'requests>=2.25.1',
-        'Werkzeug>=1.0.1',
-        'flask_restful>=0.3.9'
+        'Flask~=1.1',
+        'requests~=2.25',
+        'Werkzeug~=1.0',
+        'flask_restful~=0.3'
     ],
     classifiers=[
         'Environment :: Web Environment',

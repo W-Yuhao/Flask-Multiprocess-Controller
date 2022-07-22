@@ -5,7 +5,7 @@
 import json
 import logging
 import requests
-from multiprocessing import Lock
+from multiprocessing import Lock, Event
 from multiprocessing.connection import Connection
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class AbortException(BaseException):
     pass
 
 
-def safe_pipe_send(lock: Lock, pipe_end: Connection, msg) -> None:
+def upload_status(lock: Lock, pipe_end: Connection, msg) -> None:
     """
     safely send msg using Pipe between processes by Lock
     :param lock: Lock that both pipes' end used
@@ -31,6 +31,22 @@ def safe_pipe_send(lock: Lock, pipe_end: Connection, msg) -> None:
         pipe_end.send(msg)
     finally:
         lock.release()
+
+
+def set_checkpoint(stop_event: Event, task_name: str, counter: int = None) -> None:
+    """
+    check the stop signal, if met raise AbortException and exit gently
+    :param stop_event: the stop_event Event object passed when spawning process
+    :param task_name: current task's name
+    :param counter: if specified will log exception with counter str
+    :return:
+    """
+    if counter is None:
+        exception_str = "Task {} aborted by signal.".format(task_name)
+    else:
+        exception_str = "Task {}-{} aborted by signal.".format(task_name, counter)
+    if stop_event.is_set():
+        raise AbortException(exception_str)
 
 
 def send_request(url, data, callback_loop: int = 3,

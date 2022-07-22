@@ -68,7 +68,7 @@ class MetaMPTask(metaclass=abc.ABCMeta):
         """
         logger.critical("Task {}-{} aborted by signal.".format(self.task_name, self.counter))
 
-    def upload_status(self, msg):
+    def upload_status(self, msg) -> None:
         """
         safely send msg using Pipe between processes by Lock
         :param msg: message to send
@@ -80,7 +80,11 @@ class MetaMPTask(metaclass=abc.ABCMeta):
         finally:
             self._lock.release()
 
-    def checkpoint(self):
+    def set_checkpoint(self) -> None:
+        """
+        check the stop signal, if met raise AbortException and exit gently
+        :return:
+        """
         if self._stop_event.is_set():
             raise AbortException("Task {}-{} aborted by signal.".format(self.task_name, self.counter))
 

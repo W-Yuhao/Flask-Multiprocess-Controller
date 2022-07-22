@@ -5,17 +5,19 @@
 from .task import MetaMPTask
 from .controller import MetaMPController
 from .resource import MetaMPResource
-from .utils import safe_pipe_send
+from .utils import upload_status, set_checkpoint, AbortException
 from .template import TemplateMPResource, TemplateMPController
 from .logger import MetaMPLoggerConfigurator
 
-__version__ = '0.0'
+__version__ = '0.1'
 
 __all__ = [
     'MetaMPTask',
     'MetaMPController',
     'MetaMPResource',
-    'safe_pipe_send',
+    'upload_status',
+    'set_checkpoint',
+    'AbortException',
     'TemplateMPResource',
     'TemplateMPController',
     'MetaMPLoggerConfigurator'

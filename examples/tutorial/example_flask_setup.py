@@ -23,8 +23,10 @@ class MainTask(MetaMPTask):
             counter += 1
             task_logger.debug("doing some simple task, progress {}%.".format(counter * 5))
             time.sleep(0.5)
+            # upload status to the controller
             self.upload_status(counter)
-            self.checkpoint()
+            # check the stop signal, if flagged raise AbortException to the exception catcher
+            self.set_checkpoint()
 
         task_logger.info("Execution Finished!")
 

@@ -14,9 +14,11 @@ def create_app():
     :return:
     """
     import flask
-    from example_flask_setup import main_api
+    from example_main_api import main_api
+    from example_local_callback_api import local_callback_api
     app = flask.Flask(__name__)
     main_api.init_app(app)
+    local_callback_api.init_app(app)
     return app
 
 

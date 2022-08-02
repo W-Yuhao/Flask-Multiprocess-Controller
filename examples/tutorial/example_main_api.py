@@ -12,7 +12,7 @@ from src.flask_multiprocess_controller import *
 class MainTask(MetaMPTask):
 
     def execute(self, *args, **kwargs) -> None:
-        task_logger = logging.getLogger(str(os.getpid()))
+        task_logger = logging.getLogger("Main-" + str(os.getpid()))
 
         task_logger.info("MAIN_TASK starts executing by process {}".format(os.getpid()))
         task_logger.info("Getting param: {}".format(kwargs))
@@ -33,9 +33,14 @@ class MainTask(MetaMPTask):
 
 main_api = Api()
 # this is the place to config the max num of processes you'd like to use in this specific controller
-main_controller = TemplateMPController(target_task=MainTask, max_num_process=2)
+main_controller = TemplateMPController(target_task=MainTask, max_num_process=2,
+                                       callback_url='http://127.0.0.1:8050/local_callback')
 
 # must pass the controller object to the resource object
 # when received a http request, a new resource instance will be created, so it's not possible to store info in
 # resource object
 main_api.add_resource(TemplateMPResource, '/main', resource_class_args=(main_controller,))
+
+
+# one can use the TemplateMPResource and TemplateMPController for single-task server build up
+# these template class can ONLY bind to once

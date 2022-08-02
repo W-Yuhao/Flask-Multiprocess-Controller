@@ -38,7 +38,7 @@ for more functionality.
     import logging
     from flask import Flask
     from flask_restful import Api
-    from flask_multiprocess_controller import TemplateMPController, TemplateMPResource, MetaMPTask
+    from flask_multiprocess_controller import TemplateFactory, MetaMPTask
 
     class SampleTask(MetaMPTask):
 
@@ -53,8 +53,8 @@ for more functionality.
                 self.checkpoint()
 
     sample_api = Api()
-    sample_controller = TemplateMPController(target_task=SampleTask, max_num_process=2)
-    sample_api.add_resource(TemplateMPResource, '/sample', resource_class_args=(sample_controller,))
+    sample_controller = TemplateFactory.MPController(name='Sample')(target_task=SampleTask, max_num_process=2)
+    sample_api.add_resource(TemplateFactory.MPResource(), '/sample', resource_class_args=(sample_controller,))
 
     app = Flask('Sample')
     sample_api.init_app(app)

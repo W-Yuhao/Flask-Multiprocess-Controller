@@ -6,10 +6,10 @@ from .task import MetaMPTask
 from .controller import MetaMPController
 from .resource import MetaMPResource
 from .utils import upload_status, set_checkpoint, AbortException
-from .template import TemplateMPResource, TemplateMPController
+from .template import TemplateFactory
 from .logger import MetaMPLoggerConfigurator
 
-__version__ = '0.1'
+__version__ = '0.1.1'
 
 __all__ = [
     'MetaMPTask',
@@ -18,7 +18,6 @@ __all__ = [
     'upload_status',
     'set_checkpoint',
     'AbortException',
-    'TemplateMPResource',
-    'TemplateMPController',
-    'MetaMPLoggerConfigurator'
+    'MetaMPLoggerConfigurator',
+    'TemplateFactory'
 ]

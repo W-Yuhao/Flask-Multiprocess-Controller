@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/06/20
+"""
+    flask_multiprocess_controller.task
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements task that MPController will execute upon receiving requests with built-in
+    status upload and check stop signal methods.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 import logging
 import abc

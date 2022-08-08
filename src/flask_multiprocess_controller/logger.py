@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/07/19
+"""
+    flask_multiprocess_controller.logger
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements logger configurator that create the process-safe logger used
+    in MPController object and provides a default logger configurator.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 import logging
 import abc

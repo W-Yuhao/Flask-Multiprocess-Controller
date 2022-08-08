@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/06/17
+"""
+    flask_multiprocess_controller.controller
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements the core multiprocess controller object.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 import abc
 import functools

@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/07/20
+"""
+    flask_multiprocess_controller
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Simple framework for creating Multiprocess task workers with
+    an extra layer of control in Flask.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 from .task import MetaMPTask
 from .controller import MetaMPController

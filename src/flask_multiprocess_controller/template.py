@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/07/21
+"""
+    flask_multiprocess_controller.template
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements templates that can generate MPController and MPResource class definition automatically.
+
+    TemplateFactory may be readily useful when there is no need to redeclare and override MPController and MPResource.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 import uuid
 

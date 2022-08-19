@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/08/02
+"""
+    The example implementation of local callback to use the default callback
+    provided by flask_multiprocess_controller package.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 import os
 import logging

@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/07/19
+"""
+    flask_multiprocess_controller.utils
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements some utils global function and exceptions that might be useful when using this package.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 import json
 import logging

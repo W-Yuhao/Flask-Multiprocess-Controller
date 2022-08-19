@@ -1,6 +1,9 @@
 
 # Flask-Multiprocess-Controller
 
+[![Downloads](https://static.pepy.tech/personalized-badge/flask-multiprocess-controller?period=total&units=international_system&left_color=blue&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/flask-multiprocess-controller)
+
+
 **Flask-Multiprocess-Controller** is an extension for [Flask](https://flask.palletsprojects.com/) that provides an 
 easy-to-implement controller for multiprocessing tasking. It provides default functions such as task-queueing, 
 health-check, status-check, manual-stop and process-safe logger. 

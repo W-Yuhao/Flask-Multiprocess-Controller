@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/07/20
+"""
+    The example implementation of server setup.
+
+    Provides both gunicorn and python ways to boot the server.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 # one must protect all the create_app and run_app method from the spawning process
 # don't use the __init__ file to create app
@@ -28,7 +34,6 @@ def local_run():
     command: python example_server.py
 
     DO NOT USE IT IN A PRODUCTION ENVIRONMENT
-    https://flask.palletsprojects.com/en/2.1.x/deploying/
     :return:
     """
     app = create_app()

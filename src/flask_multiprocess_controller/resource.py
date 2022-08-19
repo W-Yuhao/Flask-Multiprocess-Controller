@@ -1,6 +1,16 @@
 # -*- coding: utf-8 -*-
-# @author: Yuhao Wang
-# @date: 2022/06/17
+"""
+    flask_multiprocess_controller.resource
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    This module implements a overridden version of flask-RESTful Resource class that works along with
+    the MPController class.
+
+    Override http methods will skip the core multiprocess spawning processing implemented in MPController.
+
+    :copyright: 2022 Yuhao Wang
+    :license: BSD-3-Clause
+"""
 
 import inspect
 import json
